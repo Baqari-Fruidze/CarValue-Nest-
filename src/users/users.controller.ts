@@ -10,17 +10,21 @@ import {
   NotFoundException,
   Session,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UsersService } from './users.service';
 
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { Serialize } from 'src/interceptors/serialize.interceptor';
+// import { Serialize } from 'src/interceptors/serialize.interceptor';
 import { UserDto } from './dtos/user.dto';
 import { AuthService } from './auth.service';
 import { currentUser } from './decorators/current-user.decorators';
 import { CurrentUserInterceptor } from './decorators/current-user.interceptor';
 import { User } from './user.entity';
+// import { AuthGuard } from 'src/guards/auth.guard';
+import { Serialize } from '../interceptors/serialize.interceptor';
+import { AuthGuard } from '../guards/auth.guard';
 
 @Controller('auth')
 @Serialize(UserDto)
@@ -39,6 +43,7 @@ export class UsersController {
   // }
 
   @Get('/whoami')
+  @UseGuards(AuthGuard)
   whoAmI(@currentUser() user: User) {
     return user;
   }
@@ -63,7 +68,6 @@ export class UsersController {
 
   @Get(`/:id`)
   async findUser(@Param('id') id: string) {
-    console.log('handler is running');
     const user = await this.usersService.findOne(Number(id));
     if (!user) {
       throw new NotFoundException('user not found');

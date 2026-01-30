@@ -16,18 +16,18 @@ export class User {
   @Column()
   password: string;
 
-  // @AfterInsert()
-  // logInsert() {
-  //   console.log('User inserted:', this.id);
-  // }
+  @AfterInsert()
+  logInsert() {
+    console.log('User inserted:', this.id);
+  }
 
-  // @AfterUpdate()
-  // logUpdate() {
-  //   console.log('User updated:', this.id);
-  // }
+  @AfterUpdate()
+  logUpdate() {
+    console.log('User updated:', this.id);
+  }
 
-  // @AfterRemove()
-  // logRemove() {
-  //   console.log('User removed:', this.id);
-  // }
+  @AfterRemove()
+  logRemove() {
+    console.log('User removed:', this.id);
+  }
 }
