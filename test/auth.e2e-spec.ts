@@ -7,7 +7,7 @@ import cookieSession from 'cookie-session';
 import { existsSync, rmSync } from 'fs';
 import { join } from 'path';
 
-describe('AppController (e2e)', () => {
+describe('authentication system (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeEach(async () => {
@@ -16,17 +16,19 @@ describe('AppController (e2e)', () => {
 
     if (existsSync(dbPath)) rmSync(dbPath, { force: true });
 
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+    const moduleFixture = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
     app.use(
       cookieSession({
         keys: ['kone'],
       }),
     );
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+
     await app.init();
   });
 
@@ -34,10 +36,31 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
-  it('/ (GET)', () => {
+  it('handles a sign up requst', () => {
+    const email = `test${Date.now()}@test.com`;
     return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+      .post(`/auth/signup`)
+      .send({ email, password: 'sdssa' })
+      .expect(201)
+      .then((res) => {
+        const { id, email: responseEmail } = res.body;
+        expect(id).toBeDefined();
+        expect(responseEmail).toEqual(email);
+      });
+  });
+  it(`sign upp a new user then get current user`, async () => {
+    const email = 'adsa@gmail.com';
+    const password = 'password';
+    const res = await request(app.getHttpServer())
+      .post(`/auth/signup`)
+      .send({ email, password })
+      .expect(201);
+    const cookie = res.get(`Set-Cookie`) as string[];
+    const { body } = await request(app.getHttpServer())
+      .get(`/auth/whoami`)
+      .set(`Cookie`, cookie)
+      .expect(200);
+
+    expect(body.email).toEqual(email);
   });
 });

@@ -75,7 +75,7 @@ describe('authService', () => {
       service.signIn('adada@df.com', 'wrong_password'),
     ).rejects.toThrow(BadRequestException);
   });
-  it(`returns user password if correct password is provided`, async () => {
+  it(`returns the user object when valid credentials are provided`, async () => {
     await service.signUp('kone@ge', 'kone');
     const user = await service.signIn('kone@ge', 'kone');
     expect(user).toBeDefined();
